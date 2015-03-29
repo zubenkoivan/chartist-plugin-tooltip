@@ -1,0 +1,16 @@
+{
+  "name": "chartist-plugin-tooltip",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~1.11.0",
+    "chartist": "~0.7.3"
+  },
+  "ignore": [
+    ".*",
+    "Gruntfile.js",
+    "package.json",
+    "node_modules",
+    "src",
+    "test"
+  ]
+}

@@ -1,0 +1,53 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="../bower_components/chartist/dist/chartist.min.css">
+
+	<style type="text/css">
+	.main {
+		width: 700px;
+		margin: 0 auto;
+	}
+	.ct-tooltip {
+		background-color: black;
+		border-radius: 5px;
+	 	color: white;
+	  	padding: 5px;
+		position: absolute;
+		opacity: 0.8;
+		z-index: 2;
+	}
+	.ct-tooltip > .header {
+	  	font-weight: bold;
+	}
+	.ct-tooltip > .values {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+	.ct-tooltip .value {
+		margin-top: 3px;
+	}
+	.ct-tooltip .label {
+		background-color: red;
+		border-radius: 3px;
+		float: left;
+		margin-right: 3px;
+		height: 15px;
+		width: 15px;
+	}
+	</style>
+</head>
+<body>
+	<div class="main">
+	    <div class="ct-chart ct-golden-section"></div>
+	</div>
+	
+	<script type="text/javascript" src="../bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="../bower_components/chartist/dist/chartist.js"></script>
+	<script type="text/javascript" src="../bower_components/limit/limit.js"></script>
+	<script type="text/javascript" src="../src/scripts/chartist-plugin-tooltip.js"></script>
+
+	<script type="text/javascript" src="./app.js"></script>
+
+</body>
+</html>
