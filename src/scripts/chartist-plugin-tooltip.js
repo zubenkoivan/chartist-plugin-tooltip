@@ -32,7 +32,7 @@
     var html = '<div class="header">' + labels[index] + '</div><ul class="values">';
 
     $.each(series, function (_, values) {
-      html += '<li class="value"><div class="label"></div>' + values[index] + '</li>';
+      html += '<li class="value"><div class="label">&nbsp;</div>' + values[index] + '</li>';
     });
 
     return html + '</ul>'
@@ -68,6 +68,8 @@
           .hide();
 
         $chart.on('mousemove', function (event) {
+
+          if (event.target.tagName !== 'svg') return;
 
           var offsetX = (event.offsetX || event.originalEvent.layerX);
           var newIndex = coords.binarySearch(offsetX, 20);
