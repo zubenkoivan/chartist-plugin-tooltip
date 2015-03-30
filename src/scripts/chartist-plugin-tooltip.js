@@ -10,33 +10,61 @@
     removePoints: true
   };
 
-  Array.prototype.binarySearch = function (value, precision, start, end) {
+  var $tooltip = $('<div class="ct-tooltip"></div>').hide();
+
+  var binarySearch = function (arr, value, precision, start, end) {
 
     if (start === undefined) start = 0;
-    if (end === undefined) end = this.length - 1;
+    if (end === undefined) end = arr.length - 1;
 
     if (start > end) return -1;
 
     var middle = Math.floor((start + end) / 2);
 
-    if (Math.abs(this[middle] - value) < precision)
+    if (Math.abs(arr[middle] - value) < precision)
       return middle;
-    else if (value < this[middle])
-      return this.binarySearch(value, precision, start, middle - 1);
+    else if (value < arr[middle])
+      return binarySearch(arr, value, precision, start, middle - 1);
     else
-      return this.binarySearch(value, precision, middle + 1, end);
+      return binarySearch(arr, value, precision, middle + 1, end);
   };
 
-  var tooltipHtml = function (labels, series, index) {
+  var tooltipHtml = function (header, values) {
 
-    var html = '<div class="header">' + (labels[index] || '') + '</div><ul class="values">';
+    var html = '<div class="ct-header">' + (header || '') + 
+               '</div><ul class="ct-values">';
 
-    $.each(series, function (i, values) {
-      html += '<li class="value"><div class="label series-' + Chartist.alphaNumerate(i) +
-              '">&nbsp;</div>' + values[index] + '</li>';
+    values.forEach(function (value, i) {
+      html += '<li class="ct-value">' + 
+              '<div class="ct-label ct-label-' + Chartist.alphaNumerate(i) + '"></div>' +
+              value +
+              '</li>';
     });
 
     return html + '</ul>'
+  };
+
+  var getValues = function (series, index) {
+    return series.map(function (x) { 
+      return x[index];
+    });
+  };
+
+  var getTooltipOffset = function (left, top, maxY) {
+
+    var tooltipHeight = $tooltip.outerHeight() + 5;
+
+    return {
+      left: left + 10,
+      top: top < tooltipHeight ? (top + 5) : (top - tooltipHeight)
+    };
+  };
+
+  var showTooltip = function (header, values, offset) {
+    $tooltip
+      .html(tooltipHtml(header, values))
+      .css(offset)
+      .show();
   };
 
   Chartist.plugins = Chartist.plugins || {};
@@ -49,9 +77,10 @@
       if(!(chart instanceof Chartist.Line))
         return;
 
-      var labels = chart.data.labels;
       var series = [];
+      var labels = chart.data.labels;
       var coords = new Array(labels.length);
+
       var bottom;
 
       chart.on('draw', function(data) {
@@ -66,17 +95,11 @@
           bottom = data.y1;
       });
 
-      var $chart = $(chart.container);
-
-      var precision;
-      var tooltipIndex = -1;
-      var $tooltip = $('<div class="ct-tooltip"></div>').appendTo($chart).hide();
+      var $chart = $(chart.container).append($tooltip);
+      var index = -1;
 
       $chart.on('mouseleave', function () {
-
-        if (event.target.tagName !== 'svg') return;
-
-        tooltipIndex = -1;
+        index = -1;
         $tooltip.hide();
       });
 
@@ -84,26 +107,21 @@
 
         if (event.target.tagName !== 'svg') return;
 
-        precision =  precision || (coords[1] - coords[0]) * 0.2;
-
         var offsetX = (event.offsetX || event.originalEvent.layerX);
-        var newIndex = coords.binarySearch(offsetX, precision);
+        var offsetY = (event.offsetY || event.originalEvent.layerY);
 
-        if (newIndex === tooltipIndex)
-          return;
+        var precision = (coords[1] - coords[0]) * 0.1;
+        var newIndex = binarySearch(coords, offsetX, precision);
 
-        tooltipIndex = newIndex;
+        if (newIndex === index) return;
 
-        if (tooltipIndex === -1)
+        index = newIndex;
+
+        if (index === -1)
           $tooltip.hide();
         else
-          $tooltip
-            .html(tooltipHtml(labels, series, tooltipIndex))
-            .css({
-              left: coords[tooltipIndex] + 10,
-              top: bottom - ($tooltip.outerHeight() + 10)
-            })
-            .show();
+          showTooltip(labels[index], getValues(series, index),
+                      getTooltipOffset(coords[index], offsetY, bottom));
       });
     };
   };
