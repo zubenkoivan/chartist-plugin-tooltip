@@ -50,13 +50,13 @@
     });
   };
 
-  var getTooltipOffset = function (left, top, maxY) {
+  var getTooltipOffset = function (left, top) {
 
-    var tooltipHeight = $tooltip.outerHeight() + 5;
+    var tooltipHeight = $tooltip.outerHeight();
 
     return {
       left: left + 10,
-      top: top < tooltipHeight ? (top + 5) : (top - tooltipHeight)
+      top: top < tooltipHeight ? top : (top - tooltipHeight)
     };
   };
 
@@ -81,8 +81,6 @@
       var labels = chart.data.labels;
       var coords = new Array(labels.length);
 
-      var bottom;
-
       chart.on('draw', function(data) {
 
         if (data.type === 'line')
@@ -90,9 +88,6 @@
 
         if (data.type === 'point')
           coords[data.index] = data.x;
-
-        if (data.type === 'grid' && data.axis === 'y' && data.index === 0)
-          bottom = data.y1;
       });
 
       var $chart = $(chart.container).append($tooltip);
@@ -121,7 +116,7 @@
           $tooltip.hide();
         else
           showTooltip(labels[index], getValues(series, index),
-                      getTooltipOffset(coords[index], offsetY, bottom));
+                      getTooltipOffset(coords[index], offsetY));
       });
     };
   };
