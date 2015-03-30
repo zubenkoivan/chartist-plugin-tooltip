@@ -100,10 +100,10 @@
 
       $chart.on('mousemove', function (event) {
 
-        if (event.target.tagName !== 'svg') return;
+        if (event.target.tagName.toLowerCase() !== 'svg') return;
 
-        var offsetX = (event.offsetX || event.originalEvent.layerX);
-        var offsetY = (event.offsetY || event.originalEvent.layerY);
+        var offsetX = event.offsetX || event.originalEvent.layerX;
+        var offsetY = event.offsetY || event.originalEvent.layerY;
 
         var precision = (coords[1] - coords[0]) * 0.1;
         var newIndex = binarySearch(coords, offsetX, precision);
