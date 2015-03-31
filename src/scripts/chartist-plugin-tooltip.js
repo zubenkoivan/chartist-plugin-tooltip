@@ -31,17 +31,12 @@
 
   var tooltipHtml = function (header, values) {
 
-    var html = '<div class="ct-header">' + (header || '') + 
-               '</div><ul class="ct-values">';
+    var html = '<div class="ct-header">' + (header || '') + '</div>';
 
-    values.forEach(function (value, i) {
-      html += '<li class="ct-value">' + 
-              '<div class="ct-label ct-label-' + Chartist.alphaNumerate(i) + '"></div>' +
-              value +
-              '</li>';
-    });
-
-    return html + '</ul>'
+    return values.reduce(function (prev, value, i) {
+      return prev + '<div class="ct-series ct-series-' + Chartist.alphaNumerate(i) + '">' + 
+              '<div class="ct-label"></div>' + value + '</div>';
+    }, html);
   };
 
   var getValues = function (series, index) {
@@ -98,7 +93,7 @@
         $tooltip.hide();
       });
 
-      $chart.on('mousemove', function (event) {
+      $chart.on('mousemove', '.ct-chart-line', function (event) {
 
         if (event.target.tagName.toLowerCase() !== 'svg') return;
 
