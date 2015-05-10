@@ -9,16 +9,23 @@
   var defaultOptions = {
     formatHeader: Chartist.noop,
     formatValue: Chartist.noop,
-    hideCursorPosition: Chartist.noop,
-    cursorHeader: Chartist.noop
+    cursor: {
+      hiddenPosition: Chartist.noop,
+      header: Chartist.noop
+    },
+    classNames: {
+      tooltip: 'tooltip',
+      cursor: 'cursor'
+    }
   };
 
-  var Tooltip = function (chart, chartRect, coords) {
+  var Tooltip = function (chart, chartRect, coords, options) {
 
-    var $tooltip = $('.ct-tooltip', chart.container);
+    var $tooltip = $('.' + options.classNames.tooltip, chart.container);
 
-    if (!$tooltip.length)
-      $tooltip = $('<div class="ct-tooltip"></div>').appendTo(chart.container);
+    if (!$tooltip.length) {
+      $tooltip = $('<div class="' + options.classNames.tooltip + '"></div>').appendTo(chart.container);
+    }
 
     $tooltip.hide();
 
@@ -52,20 +59,22 @@
     };
   };
 
-  var Cursor = function (chart, chartRect, coords) {
+  var Cursor = function (chart, chartRect, coords, options) {
 
-    var cursor = chart.svg.elem('line', {}, 'cursor');
+    var cursor = chart.svg.elem('line', {}, options.classNames.cursor);
 
-    var $header = $('.cursor-header', chart.container);
+    var $header = $('.' + options.classNames.cursor + '-header', chart.container);
 
-    if (!$header.length)
-      $header = $('<span class="cursor-header" style="position: absolute"></span>').appendTo(chart.container);
+    if (!$header.length) {
+      $header = $('<span class="' + options.classNames.cursor + '-header" style="position: absolute"></span>')
+        .appendTo(chart.container);
+    }
 
     $header.hide();
 
-    var showHeader = function (x, headerHtml) {
+    var showHeader = function (x) {
       $header
-        .html(headerHtml)
+        .html(options.cursor.header() || '')
         .css({ top: 0, left: x - $header.width() / 2 })
         .show();
     };
@@ -75,11 +84,11 @@
       $header.hide();
     };
 
-    this.show = function (index, headerHtml) {
+    this.show = function (index) {
 
       var x = coords[index];
 
-      showHeader(x, headerHtml);
+      showHeader(x);
 
       cursor.attr({
         x1: x,
@@ -97,23 +106,33 @@
 
     var binarySearch = function (value, start, end, minDistanceIndex) {
 
-      if (start === undefined) start = 0;
-      if (end === undefined) end = coords.length - 1;
+      if (start === undefined) {
+        start = 0;
+      }
+      if (end === undefined) {
+        end = coords.length - 1;
+      }
 
-      if (start > end) return minDistanceIndex;
+      if (start > end) {
+        return minDistanceIndex;
+      }
 
       var middle = Math.floor((start + end) / 2);
       var distance = Math.abs(value - coords[middle]);
 
-      if (distance === 0) return middle;
+      if (distance === 0) {
+        return middle;
+      }
 
-      if (minDistanceIndex === undefined || distance < Math.abs(value - coords[minDistanceIndex]))
+      if (minDistanceIndex === undefined || distance < Math.abs(value - coords[minDistanceIndex])) {
         minDistanceIndex = middle;
+      }
 
-      if (value < coords[middle])
+      if (value < coords[middle]) {
         return binarySearch(value, start, middle - 1, minDistanceIndex);
-      else
+      } else {
         return binarySearch(value, middle + 1, end, minDistanceIndex);
+      }
     };
 
     this.get = function () {
@@ -128,8 +147,9 @@
 
       var newIndex = binarySearch(x);
 
-      if (index === newIndex)
+      if (index === newIndex) {
         return false;
+      }
 
       index = newIndex;
 
@@ -138,14 +158,15 @@
   };
 
   Chartist.plugins = Chartist.plugins || {};
-  Chartist.plugins.ctTooltip = function (options) {
+  Chartist.plugins.lineTooltip = function (options) {
 
     options = Chartist.extend({}, defaultOptions, options);
 
     return function (chart) {
 
-      if (!(chart instanceof Chartist.Line))
+      if (!(chart instanceof Chartist.Line)) {
         return;
+      }
 
       var series,
          labels,
@@ -163,17 +184,19 @@
 
       chart.on('draw', function (data) {
 
-        if (data.type === 'line')
+        if (data.type === 'line') {
           series[data.index] = data.values;
+        }
 
-        if (data.type === 'point')
+        if (data.type === 'point') {
           coords[data.index] = data.x;
+        }
       });
 
       chart.on('created', function (data) {
         indexTracker = new IndexTracker(coords);
-        tooltip = new Tooltip(chart, data.chartRect, coords);
-        cursor = new Cursor(chart, data.chartRect, coords);
+        tooltip = new Tooltip(chart, data.chartRect, coords, options);
+        cursor = new Cursor(chart, data.chartRect, coords, options);
       });
 
       $(chart.container).on('mouseleave', function () {
@@ -184,19 +207,23 @@
 
       $(chart.container).on('mousemove', '.' + chart.options.classNames.chart, function (event) {
 
-        if (event.target.tagName.toLowerCase() !== 'svg') return;
+        if (event.target.tagName.toLowerCase() !== 'svg') {
+          return;
+        }
 
         var offsetX = event.offsetX || event.originalEvent.layerX;
 
-        if (!indexTracker.set(offsetX))
+        if (!indexTracker.set(offsetX)) {
           return;
+        }
 
         var index = indexTracker.get();
 
-        if (options.hideCursorPosition() === labels[index])
+        if (options.cursor.hiddenPosition() === labels[index]) {
           cursor.hide();
-        else
-          cursor.show(index, options.cursorHeader());
+        } else {
+          cursor.show(index);
+        }
 
         var values = series.map(function (x, i) {
           return options.formatValue(x[index], i);

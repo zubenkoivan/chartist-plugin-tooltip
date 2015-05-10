@@ -1,5 +1,5 @@
 {
-  "name": "chartist-plugin-tooltip",
+  "name": "chartist-plugin-line-tooltip",
   "version": "0.0.1",
   "dependencies": {
     "jquery": "~1.11.0",
@@ -10,6 +10,7 @@
     "Gruntfile.js",
     "package.json",
     "node_modules",
+    "demo",
     "src",
     "test"
   ]

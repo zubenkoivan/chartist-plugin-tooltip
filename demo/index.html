@@ -1,0 +1,82 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../bower_components/chartist/dist/chartist.min.css">
+  <style type="text/css">
+  .ct-chart {
+    width: 700px;
+    height: 400px;
+    position: relative;
+  }
+  .cursor {
+    stroke-width: 3px;
+    stroke: orange;
+  }
+  .tooltip {
+  	background-color: rgba(0, 0, 0, 0.8);
+  	border-radius: 5px;
+   	color: white;
+    padding: 5px;
+  	position: absolute;
+  	z-index: 2;
+  	cursor: default;
+    margin-left: 5px;
+  }
+  .tooltip > .header {
+    	font-weight: bold;
+  }
+  .tooltip > .series {
+    line-height: 18px;
+    white-space: nowrap;
+    display: table-row;
+  }
+  .tooltip > .series > .series-label,
+  .tooltip > .series > .value {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+  }
+  .tooltip > .series > .series-label {
+    width: 32px;
+    height: 18px;
+  }
+  .tooltip > .series > .value {
+    padding-left: 5px;
+  }
+  .tooltip > .series-a .label-line {
+  	stroke: #d70206;
+    stroke-width: 3px;
+  }
+  .tooltip > .series-b .label-line {
+  	stroke: #f05b4f;
+    stroke-width: 3px;
+  }
+  .tooltip > .series-c .label-line {
+  	stroke: #f4c63d;
+    stroke-width: 3px;
+  }
+  </style>
+</head>
+<body>
+
+  <div class="ct-chart"></div>
+  
+  <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="../bower_components/chartist/dist/chartist.js"></script>
+  <script type="text/javascript" src="../dist/chartist-plugin-line-tooltip.min.js"></script>
+
+  <script type="text/javascript">
+    new Chartist.Line('.ct-chart', {
+      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      series: [
+        [12, 9, 7, 8, 5],
+        [2, 1, 3.5, 7, 3],
+        [1, 3, 4, 5, 6]
+      ]
+    }, {
+      plugins: [
+        Chartist.plugins.lineTooltip()
+      ]
+    });
+  </script>
+</body>
+</html>
