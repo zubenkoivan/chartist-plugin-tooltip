@@ -26,11 +26,12 @@
       formatHeader: Chartist.noop,
       formatValue: Chartist.noop,
       cursor: {
-        hiddenPosition: Chartist.noop,
-        header: Chartist.noop
+        hiddenPositions: [],
+        header: undefined
       },
       classNames: {
         tooltip: 'tooltip',
+        series: 'series',
         cursor: 'cursor'
       }
     };
@@ -47,11 +48,11 @@
 
       var tooltipHtml = function (header, values) {
 
-        var html = '<div class="header">' + (header || '') + '</div>';
+        var html = '<div class="' + options.classNames.tooltip + '-header">' + (header || '') + '</div>';
 
         return values.reduce(function (prev, value, i) {
-          return prev + '<div class="series series-' + Chartist.alphaNumerate(i) + '">' +
-            '<svg class="series-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg>' +
+          return prev + '<div class="' + options.classNames.series + ' ' +  options.classNames.series + '-' + Chartist.alphaNumerate(i) + '">' +
+            '<svg class="' + options.classNames.series + '-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg>' +
             '<div class="value">' + value + '</div></div>';
         }, html);
       };
@@ -90,7 +91,7 @@
 
       var showHeader = function (x) {
         $header
-          .html(options.cursor.header() || '')
+          .html(options.cursor.header || '')
           .css({ top: 0, left: x - $header.width() / 2 })
           .show();
       };
@@ -235,10 +236,10 @@
 
           var index = indexTracker.get();
 
-          if (options.cursor.hiddenPosition() === labels[index]) {
-            cursor.hide();
-          } else {
+          if (options.cursor.hiddenPositions.indexOf(labels[index]) === -1) {
             cursor.show(index);
+          } else {
+            cursor.hide();
           }
 
           var values = series.map(function (x, i) {

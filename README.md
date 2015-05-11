@@ -13,11 +13,12 @@ var defaultOptions = {
   formatHeader: Chartist.noop,
   formatValue: Chartist.noop,
   cursor: {
-    hiddenPosition: Chartist.noop,
-    header: Chartist.noop
+    hiddenPositions: [],
+    header: undefined
   },
   classNames: {
     tooltip: 'tooltip',
+    series: 'series',
     cursor: 'cursor'
   }
 };

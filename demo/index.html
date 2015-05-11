@@ -74,7 +74,11 @@
       ]
     }, {
       plugins: [
-        Chartist.plugins.lineTooltip()
+        Chartist.plugins.lineTooltip({
+          cursor: {
+            hiddenPositions: ['Tuesday', 'Thursday']
+          }
+        })
       ]
     });
   </script>
