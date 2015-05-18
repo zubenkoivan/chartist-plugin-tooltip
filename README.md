@@ -12,10 +12,7 @@ Please visit http://gionkunz.github.io/chartist-js/plugins.html for more informa
 var defaultOptions = {
   formatHeader: Chartist.noop,
   formatValue: Chartist.noop,
-  cursor: {
-    hiddenPositions: [],
-    header: undefined
-  },
+  cursorHeader: '',
   classNames: {
     tooltip: 'tooltip',
     series: 'series',

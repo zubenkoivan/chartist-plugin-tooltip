@@ -9,10 +9,7 @@
   var defaultOptions = {
     formatHeader: Chartist.noop,
     formatValue: Chartist.noop,
-    cursor: {
-      hiddenPositions: [],
-      header: undefined
-    },
+    cursorHeader: '',
     classNames: {
       tooltip: 'tooltip',
       series: 'series',
@@ -75,7 +72,7 @@
 
     var showHeader = function (x) {
       $header
-        .html(options.cursor.header || '')
+        .html(options.cursorHeader || '')
         .css({ top: 0, left: x - $header.width() / 2 })
         .show();
     };
@@ -220,11 +217,7 @@
 
         var index = indexTracker.get();
 
-        if (options.cursor.hiddenPositions.indexOf(labels[index]) === -1) {
-          cursor.show(index);
-        } else {
-          cursor.hide();
-        }
+        cursor.show(index);
 
         var values = series.map(function (x, i) {
           return options.formatValue(x[index], i);
