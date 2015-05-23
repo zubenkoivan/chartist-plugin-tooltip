@@ -42,15 +42,15 @@
   .tooltip > .series > .value {
     padding-left: 5px;
   }
-  .tooltip > .series-a .label-line {
+  .data-a, .tooltip > .data-a .label-line {
   	stroke: #d70206;
     stroke-width: 3px;
   }
-  .tooltip > .series-b .label-line {
+  .data-b, .tooltip > .data-b .label-line {
   	stroke: #f05b4f;
     stroke-width: 3px;
   }
-  .tooltip > .series-c .label-line {
+  .data-c, .tooltip > .data-c .label-line {
   	stroke: #f4c63d;
     stroke-width: 3px;
   }
@@ -62,15 +62,27 @@
   
   <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="../bower_components/chartist/dist/chartist.js"></script>
-  <script type="text/javascript" src="../dist/chartist-plugin-line-tooltip.min.js"></script>
+  <script type="text/javascript" src="../dist/chartist-plugin-line-tooltip.js"></script>
 
   <script type="text/javascript">
     new Chartist.Line('.ct-chart', {
       labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
       series: [
-        [12, 9, 7, 8, 5],
-        [2, 1, 3.5, 7, 3],
-        [1, 3, 4, 5, 6]
+        {
+          groupName: 'a',
+          className: 'data-a',
+          data: [12, 9, 7, 8, 5]
+        },
+        {
+          groupName: 'a',
+          className: 'data-b',
+          data: [2, 9, 3.5, 7, 3]
+        },
+        {
+          groupName: 'a',
+          className: 'data-c',
+          data: [1, 9, 4, 5, 6]
+        }
       ]
     }, {
       plugins: [

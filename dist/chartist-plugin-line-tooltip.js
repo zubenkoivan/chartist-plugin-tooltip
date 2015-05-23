@@ -25,10 +25,7 @@
     var defaultOptions = {
       formatHeader: Chartist.noop,
       formatValue: Chartist.noop,
-      cursor: {
-        hiddenPositions: [],
-        header: undefined
-      },
+      cursorLabel: undefined,
       classNames: {
         tooltip: 'tooltip',
         series: 'series',
@@ -46,14 +43,54 @@
 
       $tooltip.hide();
 
+      var getGroupName = function (index) {
+        return chart.data.series[index].groupName || Chartist.alphaNumerate(index);
+      };
+
+      var getClassName = function (index) {
+        return chart.data.series[index].className || (options.classNames.series + '-' + Chartist.alphaNumerate(index));
+      };
+
+      var group = function (values) {
+
+        var groups = {};
+
+        return values
+          .map(function (value, i) {
+            return {
+              groupName: getGroupName(i),
+              className: getClassName(i),
+              text: value
+            };
+          })
+          .filter(function (group) {
+            if (group.text !== undefined && group.text !== null && group.text !== '') {
+              groups[group.groupName] = groups[group.groupName] || [];
+              return true;
+            }
+            return false;
+          })
+          .reduce(function (result, group) {
+            if (groups[group.groupName].indexOf(group.text) === -1) {
+              groups[group.groupName].push(group.text);
+              result.push(group);
+            }
+            return result;
+          }, []);
+      };
+
+      var staticHtmlStart = '<div class="' + options.classNames.series + ' ';
+      var staticHtmlMiddle = '"><svg class="' + options.classNames.series + '-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg><div class="value">';
+      var staticHtmlEnd = '</div></div>';
+
       var tooltipHtml = function (header, values) {
 
         var html = '<div class="' + options.classNames.tooltip + '-header">' + (header || '') + '</div>';
 
-        return values.reduce(function (prev, value, i) {
-          return prev + '<div class="' + options.classNames.series + ' ' +  options.classNames.series + '-' + Chartist.alphaNumerate(i) + '">' +
-            '<svg class="' + options.classNames.series + '-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg>' +
-            '<div class="value">' + value + '</div></div>';
+        values = group(values);
+
+        return values.reduce(function (prev, value) {
+          return prev + staticHtmlStart + value.className + staticHtmlMiddle + value.text + staticHtmlEnd;
         }, html);
       };
 
@@ -70,9 +107,9 @@
 
       this.show = function (index, header, values) {
         $tooltip
-        .html(tooltipHtml(header, values))
-        .css(getTooltipOffset(coords[index]))
-        .show();
+          .html(tooltipHtml(header, values))
+          .css(getTooltipOffset(coords[index]))
+          .show();
       };
     };
 
@@ -80,38 +117,42 @@
 
       var cursor = chart.svg.elem('line', {}, options.classNames.cursor);
 
-      var $header = $('.' + options.classNames.cursor + '-header', chart.container);
+      var $label = $('.' + options.classNames.cursor + '-label', chart.container);
 
-      if (!$header.length) {
-        $header = $('<span class="' + options.classNames.cursor + '-header" style="position: absolute"></span>')
+      if (!$label.length) {
+        $label = $('<span class="' + options.classNames.cursor + '-label" style="position: absolute"></span>')
+          .html(options.cursorLabel || '')
           .appendTo(chart.container);
       }
 
-      $header.hide();
+      $label
+        .hide()
+        .css('top', chart.options.chartPadding.top - $label.outerHeight());
 
-      var showHeader = function (x) {
-        $header
-          .html(options.cursor.header || '')
-          .css({ top: 0, left: x - $header.width() / 2 })
+      var halfLabelWidth = $label.width() / 2;
+
+      var showLabel = function (x) {
+        $label
+          .css('left', x - halfLabelWidth)
           .show();
       };
 
       this.hide = function () {
         cursor.attr({ style: 'display: none' });
-        $header.hide();
+        $label.hide();
       };
 
       this.show = function (index) {
 
         var x = coords[index];
 
-        showHeader(x);
+        showLabel(x);
 
         cursor.attr({
           x1: x,
           x2: x,
           y1: chartRect.y1,
-          y2: chartRect.y2 + $header.height(),
+          y2: chartRect.y2,
           style: ''
         });
       };
@@ -186,12 +227,12 @@
         }
 
         var series,
-           labels,
-           coords;
+          labels,
+          coords;
 
         var tooltip,
-           cursor,
-           indexTracker;
+          cursor,
+          indexTracker;
 
         chart.on('data', function (event) {
           labels = event.data.labels;
@@ -236,11 +277,7 @@
 
           var index = indexTracker.get();
 
-          if (options.cursor.hiddenPositions.indexOf(labels[index]) === -1) {
-            cursor.show(index);
-          } else {
-            cursor.hide();
-          }
+          cursor.show(index);
 
           var values = series.map(function (x, i) {
             return options.formatValue(x[index], i);
@@ -251,7 +288,7 @@
       };
     };
 
-  }(window, document, Chartist));
+  } (window, document, Chartist));
 
   return Chartist.plugins.lineTooltip;
 
