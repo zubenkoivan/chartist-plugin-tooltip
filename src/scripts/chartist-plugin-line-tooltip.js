@@ -61,8 +61,6 @@
           return result;
         }, []);
     };
-    
-    var cache = {};
 
     var tooltipHtml = function (index) {
       
@@ -77,28 +75,27 @@
           '<div class="value">' + value.text + '</div></div>';
       }, html);
     };
+    
+    var tooltipOffsetCache = {};
 
     var getTooltipOffset = function (index) {
-      return {
+      return tooltipOffsetCache[index] || (tooltipOffsetCache[index] = {
         left: coords[index],
         top: chartRect.height() / 2 - $tooltip.outerHeight() / 2
-      };
+      });
     };
     
-    var getTooltip = function (index) {
-      return cache[index] || (cache[index] = {
-        html: tooltipHtml(index),
-        offset: getTooltipOffset(index)
-      });
+    var tooltipHtmlCache = {};
+
+    var getTooltipHtml = function (index) {
+      return tooltipHtmlCache[index] || (tooltipHtmlCache[index] = tooltipHtml(index));
     };
 
     this.show = function (index) {
-      
-      var tooltip = getTooltip(index);
-      
+
       $tooltip
-        .html(tooltip.html)
-        .css(tooltip.offset)
+        .html(getTooltipHtml(index))
+        .css(getTooltipOffset(index))
         .show();
     };
 
