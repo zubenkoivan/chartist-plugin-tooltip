@@ -33,7 +33,7 @@
       }
     };
 
-    var Tooltip = function (chart, chartRect, coords, options) {
+    var Tooltip = function (chart, chartRect, coords, options, labels, series) {
 
       var $tooltip = $('.' + options.classNames.tooltip, chart.container);
 
@@ -51,65 +51,75 @@
         return chart.data.series[index].className || (options.classNames.series + '-' + Chartist.alphaNumerate(index));
       };
 
-      var group = function (values) {
+      var getGroupedValues = function (index) {
 
         var groups = {};
 
-        return values
-          .map(function (value, i) {
+        return series
+          .map(function (data, i) {
             return {
               groupName: getGroupName(i),
               className: getClassName(i),
-              text: value
+              text: options.formatValue(data[index], i)
             };
           })
           .filter(function (group) {
-            if (group.text !== undefined && group.text !== null && group.text !== '') {
-              groups[group.groupName] = groups[group.groupName] || [];
-              return true;
-            }
-            return false;
+            return group.text !== undefined && group.text !== null && group.text !== '';
           })
           .reduce(function (result, group) {
-            if (groups[group.groupName].indexOf(group.text) === -1) {
-              groups[group.groupName].push(group.text);
+
+            var texts = groups[group.groupName] || (groups[group.groupName] = []);
+
+            if (texts.indexOf(group.text) === -1) {
+              texts.push(group.text);
               result.push(group);
             }
             return result;
           }, []);
       };
 
-      var staticHtmlStart = '<div class="' + options.classNames.series + ' ';
-      var staticHtmlMiddle = '"><svg class="' + options.classNames.series + '-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg><div class="value">';
-      var staticHtmlEnd = '</div></div>';
+      var cache = {};
 
-      var tooltipHtml = function (header, values) {
+      var tooltipHtml = function (index) {
+
+        var header = options.formatHeader(labels[index], index);
+        var values = getGroupedValues(index);
 
         var html = '<div class="' + options.classNames.tooltip + '-header">' + (header || '') + '</div>';
 
-        values = group(values);
-
         return values.reduce(function (prev, value) {
-          return prev + staticHtmlStart + value.className + staticHtmlMiddle + value.text + staticHtmlEnd;
+          return prev + '<div class="' + options.classNames.series + ' ' + value.className + '">' +
+            '<svg class="' + options.classNames.series + '-label"><line x1="0" x2="100%" y1="50%" y2="50%" class="label-line"></line></svg>' +
+            '<div class="value">' + value.text + '</div></div>';
         }, html);
       };
 
-      var getTooltipOffset = function (left) {
+      var getTooltipOffset = function (index) {
         return {
-          left: left,
+          left: coords[index],
           top: chartRect.height() / 2 - $tooltip.outerHeight() / 2
         };
       };
 
-      this.hide = function () {
-        $tooltip.hide();
+      var getTooltip = function (index) {
+        return cache[index] || (cache[index] = {
+          html: tooltipHtml(index),
+          offset: getTooltipOffset(index)
+        });
       };
 
-      this.show = function (index, header, values) {
+      this.show = function (index) {
+
+        var tooltip = getTooltip(index);
+
         $tooltip
-          .html(tooltipHtml(header, values))
-          .css(getTooltipOffset(coords[index]))
+          .html(tooltip.html)
+          .css(tooltip.offset)
           .show();
+      };
+
+      this.hide = function () {
+        $tooltip.hide();
       };
     };
 
@@ -253,7 +263,7 @@
 
         chart.on('created', function (data) {
           indexTracker = new IndexTracker(coords);
-          tooltip = new Tooltip(chart, data.chartRect, coords, options);
+          tooltip = new Tooltip(chart, data.chartRect, coords, options, labels, series);
           cursor = new Cursor(chart, data.chartRect, coords, options);
         });
 
@@ -276,14 +286,8 @@
           }
 
           var index = indexTracker.get();
-
           cursor.show(index);
-
-          var values = series.map(function (x, i) {
-            return options.formatValue(x[index], i);
-          });
-
-          tooltip.show(index, options.formatHeader(labels[index], index), values);
+          tooltip.show(index);
         });
       };
     };
